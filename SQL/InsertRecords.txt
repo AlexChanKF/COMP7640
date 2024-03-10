@@ -1,0 +1,44 @@
+-- Insert records into `Vendor`
+INSERT INTO Vendor (BusinessName, CustomerFeedbackScore, GeographicalPresence) VALUES
+('Global Tech Innovations Co., Ltd.', 90, 'Global'),
+('Super Urban Co., Ltd.', 85, 'North America'),
+('Metropolis Technology Co., Ltd.', 95, 'Europe'),
+('Adventure Gear Co., Ltd.', 80, 'Asia'),
+('Green Tech Essentials Co., Ltd.', 88, 'Global');
+
+-- Insert records into `Product`
+INSERT INTO Product (VendorID, Name, Price, Tag1, Tag2, Tag3) VALUES
+(1, 'EcoCharge Solar Power Bank', 19.99, 'Electronics', 'Gadget', 'Portable'),
+(2, 'High-Performance Men’s Running Shoe', 29.99, 'Apparel', 'Men', 'Shoe'),
+(1, 'HomeSurround Bluetooth Speaker', 39.99, 'Electronics', 'Home', 'Speaker'),
+(3, 'Ultimate Sci-Fi Collection eBook', 49.99, 'Media', 'Books', 'Novel'),
+(4, 'Eco-friendly Reusable Water Bottle', 14.99, 'Sustainable', 'Accessories', 'Hydration'),
+(1, 'Wireless Ergonomic Keyboard', 49.99, 'Electronics', 'Peripheral', 'Ergonomic'),
+(2, 'Trailblazer GPS Smartwatch', 199.99, 'Apparel', 'Accessory', 'Wearable'),
+(1, 'Smart LED Light Bulb', 15.99, 'Electronics', 'Home', 'Lighting'),
+(3, 'Professional Photography Drone', 349.99, 'Electronics', 'Camera', 'Drone'),
+(5, 'Organic Cotton Yoga Mat', 29.99, 'Sustainable', 'Fitness', 'Yoga');
+
+-- Insert records into `Customer`
+INSERT INTO Customer (ContactNumber, ShippingDetails) VALUES
+('123-456-7890', '123 First St, City, Country'),
+('234-567-8901', '234 Second St, City, Country'),
+('345-678-9012', '345 Third St, City, Country'),
+('456-789-0123', '456 Fourth St, City, Country'),
+('567-890-1234', '567 Fifth St, City, Country');
+
+-- Insert records into `Order`
+INSERT INTO `Order` (CustomerID, OrderDate) VALUES
+(1, '2024-03-01'),
+(2, '2024-03-02'),
+(3, '2024-03-03'),
+(4, '2024-03-04'),
+(5, '2024-03-05');
+
+-- Insert records into `Transaction`
+INSERT INTO `Transaction` (OrderID, CustomerID, ProductID, Quantity, Date) VALUES
+(1, 1, 1, 2, '2024-03-01'),
+(2, 2, 2, 1, '2024-03-02'),
+(3, 3, 3, 1, '2024-03-03'),
+(4, 4, 4, 1, '2024-03-04'),
+(5, 5, 5, 3, '2024-03-05');
