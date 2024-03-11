@@ -20,10 +20,31 @@ This application is a __command-line interface__ for a multi-vendor e-commerce p
 Before you begin, ensure you have met the following requirements:
 
 - You have installed __Python 3.5__ on your computer.
-- You have installed __MySQL__ and set up the necessary databases and tables.
 - You have installed Python Library __PyMySQL__
-- You have modify the `start.ps1` scripts by adding your python path
+- You have installed __MySQL__ and set up the necessary databases and tables.
+- The default schema of __MySQL__ is __comp7640__.
+- You have create tables and records according to `\SQL\CreateTable.txt` and `InsertRecords.txt`. For more information, Please refer to `HowToInsertTablesAndRecords.mp4`.
+- You have modify the `start.ps1` scripts by adding your python path.
+- You have modify the `config.ini` scripts by using your mysql account and password.
 - You have a Windows machine to run `.ps1` scripts (if you're using the PowerShell script option).
+
+## Modifying the `config.ini` Script
+Before running the application, you need to modify the `config.ini` script to your MySQL account and password. Follow these steps to modify the script:
+
+1. Locate the `config.ini` script script in the root directory of the project.
+2. Right-click on the script and choose "Edit" to open it in a text editor.
+3. Find the line that looks something like this:
+
+   ```
+   [mysql]
+   host = localhost
+   user = YourAccount
+   password = YourPassword
+   database = comp7640
+   ```
+   
+4. Replace __user__ and __password__.
+5. Save the changes and close the text editor.
 
 ## Modifying the `start.ps1` Script
 
