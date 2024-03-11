@@ -23,9 +23,9 @@ Before you begin, ensure you have met the following requirements:
 - You have installed Python Library __PyMySQL__.
 - You have installed __MySQL v8.0__.
 - The default schema of __MySQL__ is __comp7640__.
-- You have create tables and records according to `SQL\CreateTable.txt` and `SQL\InsertRecords.txt`. Please refer to `Creating Schema, Tables, Inserting Records`.
-- You have modify the `config.ini` scripts by using your mysql account and password. Please refer to `Modifying the "config.ini" Script`.
-- You have modify the `start.ps1` scripts by adding your python path. Please refer to `Modifying the "start.ps1" Script`.
+- You have created tables and records according to `SQL\CreateTable.txt` and `SQL\InsertRecords.txt`. Please refer to the below topic `Creating Schema, Tables, Inserting Records`.
+- You have modify the `config.ini` scripts by using your mysql account and password. Please refer to the below topic `Modifying the "config.ini" Script`.
+- You have modify the `start.ps1` scripts by adding your python path. Please refer to the below topic `Modifying the "start.ps1" Script`.
 - You have a Windows machine to run `.ps1` scripts (if you're using the PowerShell script option).
 
 ## Creating Schema, Tables, Inserting Records
