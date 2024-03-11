@@ -1,3 +1,5 @@
+USE comp7640;
+
 -- Insert records into `Vendor`
 INSERT INTO Vendor (BusinessName, CustomerFeedbackScore, GeographicalPresence) VALUES
 ('Global Tech Innovations Co., Ltd.', 90, 'Global'),
