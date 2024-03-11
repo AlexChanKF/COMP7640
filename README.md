@@ -20,13 +20,17 @@ This application is a __command-line interface__ for a multi-vendor e-commerce p
 Before you begin, ensure you have met the following requirements:
 
 - You have installed __Python 3.5__ on your computer.
-- You have installed Python Library __PyMySQL__
-- You have installed __MySQL__ and set up the necessary databases and tables.
+- You have installed Python Library __PyMySQL__.
+- You have installed __MySQL v8.0__.
 - The default schema of __MySQL__ is __comp7640__.
-- You have create tables and records according to `\SQL\CreateTable.txt` and `InsertRecords.txt`. For more information, Please refer to `HowToInsertTablesAndRecords.mp4`.
-- You have modify the `start.ps1` scripts by adding your python path.
-- You have modify the `config.ini` scripts by using your mysql account and password.
+- You have create tables and records according to `SQL\CreateTable.txt` and `SQL\InsertRecords.txt`. Please refer to `Creating Schema, Tables, Inserting Records`.
+- You have modify the `config.ini` scripts by using your mysql account and password. Please refer to `Modifying the "config.ini" Script`.
+- You have modify the `start.ps1` scripts by adding your python path. Please refer to `Modifying the "start.ps1" Script`.
 - You have a Windows machine to run `.ps1` scripts (if you're using the PowerShell script option).
+
+## Creating Schema, Tables, Inserting Records
+Before running the application, you need to create schema, tables and insert records.
+For more information, Please refer to `HowToInsertTablesAndRecords.mp4`.
 
 ## Modifying the `config.ini` Script
 Before running the application, you need to modify the `config.ini` script to your MySQL account and password. Follow these steps to modify the script:
