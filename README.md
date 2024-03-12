@@ -87,3 +87,34 @@ You can start the application using one of the following methods:
    ```bash
    python menu.py
    ```
+   
+   
+## Functionalities are implemented
+
+### Vendor Administration
+
+- **Display a List of All Vendors**: Done (1. Vendor Management > 2. Show Vendors)
+
+- **Onboard New Vendors**: Done (1. Vendor Management > 1. Add Vendor)
+
+### Product Catalog Management
+
+- **Browse Products by Vendor**: Done (3. Search Management > 1. Search Products By Vendor ID)
+
+- **Introduce New Products**: Done (1. Vendor Management > 1. Add Product)
+
+### Product Discovery
+
+- **Tag-Based Search Feature**: Done (3. Search Management > 2. Search Products By Tag) 
+### Product Purchase
+
+- **Purchase Support**: Done (5. Order Management > 1. New Order)
+
+- **Transaction Recording**: Coming (5. Order Management > 3. View Order History)
+
+### Order Modification
+
+- **Removing Specific Products**: Coming (5. Order Management > 2. Modify Order)
+
+- **Cancelling Entire Orders**: Coming (5. Order Management > 4. Cancel Order)
+

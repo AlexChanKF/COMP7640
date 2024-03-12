@@ -104,15 +104,17 @@ def order_management_screen():
         print("\nOrder Management:")
         print("1. New Order")
         print("2. Modify Order")
-        print("3. Return to Main Menu")
-        choice = input("Enter your choice (1/2/3): ")
+        print("3. View Order History")
+        print("4. Cancel Order")
+        print("5. Return to Main Menu")
+        choice = input("Enter your choice (1/2/3/4/5): ")
         
         if choice == '1':
             customer_id = input("Enter the Customer ID: ")
             transaction_management(customer_id)
         elif choice == '2':
             list_all_customers(db)
-        elif choice == '3':
+        elif choice == '5':
             break
         else:
             print("Invalid choice, please try again.")
