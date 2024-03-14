@@ -110,11 +110,11 @@ You can start the application using one of the following methods:
 
 - **Purchase Support**: Done (5. Order Management > 1. New Order)
 
-- **Transaction Recording**: Coming (5. Order Management > 3. View Order History)
+- **Transaction Recording**: Done (5. Order Management > 2. View Order History)
 
 ### Order Modification
 
-- **Removing Specific Products**: Coming (5. Order Management > 2. Modify Order)
+- **Removing Specific Products**: Done (5. Order Management > 3. Modify Order)
 
-- **Cancelling Entire Orders**: Coming (5. Order Management > 4. Cancel Order)
+- **Cancelling Entire Orders**: Done (5. Order Management > 4. Cancel Order)
 

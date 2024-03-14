@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS `Order` (
     OrderID INT AUTO_INCREMENT PRIMARY KEY,
     CustomerID INT,
     OrderDate DATE NOT NULL,
-    OrderStatus VARCHAR(255),
+    OrderStatus VARCHAR(255) DEFAULT 'Pending',
     FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

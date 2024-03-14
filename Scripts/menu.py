@@ -6,8 +6,8 @@ from db_config import read_db_config
 from vendor_management import add_verdor_info, show_vendors
 from product_management import add_product_info, show_products, search_products_by_vendor_id, search_products_by_tag_value
 from customer_management import add_customer_info, list_customers
-from order_management import create_order
-from transaction_management import add_transaction_info, delete_transaction, show_transactions
+from order_management import create_order, list_all_orders, cancel_order
+from transaction_management import add_transaction_info, delete_transaction, show_transactions, update_transaction
 
 # Initialize the database connection
 db_config = read_db_config()
@@ -30,7 +30,7 @@ def vendor_management_screen():
         print("2. Show Vendors")
         print("3. Return to Main Menu")
         choice = input("Enter your choice (1/2/3): ")
-        
+
         if choice == '1':
             add_verdor_info(db)
         elif choice == '2':
@@ -49,7 +49,7 @@ def product_management_screen():
         print("2. Show Products")
         print("3. Return to Main Menu")
         choice = input("Enter your choice (1/2/3): ")
-        
+
         if choice == '1':
             add_product_info(db)
         elif choice == '2':
@@ -59,7 +59,7 @@ def product_management_screen():
         else:
             print("Invalid choice, please try again.")
         input("Press Enter to continue...")
-        
+
 def search_management_screen():
     while True:
         clear_screen()
@@ -68,7 +68,7 @@ def search_management_screen():
         print("2. Search Products By Tag")
         print("3. Return to Main Menu")
         choice = input("Enter your choice (1/2/3): ")
-        
+
         if choice == '1':
             search_products_by_vendor_id(db)
         elif choice == '2':
@@ -78,7 +78,7 @@ def search_management_screen():
         else:
             print("Invalid choice, please try again.")
         input("Press Enter to continue...")
-        
+
 def customer_management_screen():
     while True:
         clear_screen()
@@ -87,7 +87,7 @@ def customer_management_screen():
         print("2. Show Customers")
         print("3. Return to Main Menu")
         choice = input("Enter your choice (1/2/3): ")
-        
+
         if choice == '1':
             add_customer_info(db)
         elif choice == '2':
@@ -97,29 +97,33 @@ def customer_management_screen():
         else:
             print("Invalid choice, please try again.")
         input("Press Enter to continue...")
-        
+
 def order_management_screen():
     while True:
         clear_screen()
         print("\nOrder Management:")
         print("1. New Order")
-        print("2. Modify Order")
-        print("3. View Order History")
+        print("2. View Order History")
+        print("3. Modify Order")
         print("4. Cancel Order")
         print("5. Return to Main Menu")
         choice = input("Enter your choice (1/2/3/4/5): ")
-        
+
         if choice == '1':
-            customer_id = input("Enter the Customer ID: ")
+            customer_id = input("[1/1] Enter the Customer ID: ")
             transaction_management(customer_id)
         elif choice == '2':
-            list_all_customers(db)
+            list_all_orders(db)
+        elif choice == '3':
+            update_transaction(db)
+        elif choice == '4':
+            cancel_order(db)
         elif choice == '5':
             break
         else:
             print("Invalid choice, please try again.")
         input("Press Enter to continue...")
-        
+
 def transaction_management(customer_id):
     transaction_list = []
     while True:
@@ -131,7 +135,7 @@ def transaction_management(customer_id):
         print("4. Complete Transaction and Order")
         print("5. Return to Main Menu")
         choice = input("Enter your choice (1/2/3/4/5): ")
-        
+
         if choice == '1':
             transaction_list = add_transaction_info(customer_id, transaction_list)
         elif choice == '2':
@@ -140,12 +144,13 @@ def transaction_management(customer_id):
             show_transactions(customer_id, transaction_list)
         elif choice == '4':
             create_order(db, customer_id, transaction_list)
+            break
         elif choice == '5':
             break
         else:
             print("Invalid choice, please try again.")
         input("Press Enter to continue...")
-        
+
 def main_menu():
     while True:
         clear_screen()
@@ -157,7 +162,7 @@ def main_menu():
         print("5. Order Management")
         print("6. Exit")
         choice = input("Enter your choice (1/2/3/4/5/6): ")
-        
+
         if choice == '1':
             vendor_management_screen()
         elif choice == '2':
