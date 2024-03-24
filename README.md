@@ -91,30 +91,43 @@ You can start the application using one of the following methods:
    
 ## Functionalities are implemented
 
+### Registration
+
+- **Register as a Vendor**: Done (0. Registration Tab > 0.1. Register as a Vendor)
+
+- **Register as a Customer**: Done (0. Registration Tab > 0.2. Register as a Customer)
+
+### Login
+
+- **Login as a Vendor**: Done (1. Login Tab > 0.1. Login as a Vendor)
+
+- **Login as a Customer**: Done (1. Login Tab > 1.2. Login as a Customer)
+
 ### Vendor Administration
 
-- **Display a List of All Vendors**: Done (Vendor Tab > 3. Show Vendors)
+- **Display a List of All Vendors**: Done (2. Vendor Tab > 2.2. Show Vendors)
 
-- **Onboard New Vendors**: Done (Vendor Tab > 1. Add Vendor)
+- **Onboard New Vendors**: Done (0. Registration Tab > 0.1. Register as a Vendor)
 
 ### Product Catalog Management
 
-- **Browse Products by Vendor**: Done (Order Tab > 1. Create Order > All Product)
+- **Browse Products by Vendor**: Done (3. Product Tab > 3.2. Show Products)
 
-- **Introduce New Products**: Done (Vendor Tab > 2. Add Product)
+- **Introduce New Products**: Done (3. Product Tab > 3.1. Add Product)
 
 ### Product Discovery
 
-- **Tag-Based Search Feature**: Done (Order Tab > 1. Create Order > Search Products By Name and Tags) 
-### Product Purchase
+- **Tag-Based Search Feature**: Done (3. Product Tab > 3.3. Search Product(s))
 
-- **Purchase Support**: Done (Order Tab > 1. Create Order > Search Products > Select Product > Click "Add In Cart" > Input "Quantity" and then "Add" > Order > Input CustID > Submit Order)
+### Product Purchase (Customer Only)
 
-- **Transaction Recording**: Done (Order Tab > 2. Modify Order)
+- **Purchase Support**: Done (5. Order Tab > 5.1. Create Order > Search Products > Select Product > Click "Add In Cart" > Input "Quantity" and then "Add" > Order > Input CustID > Submit Order)
+
+- **Transaction Recording**: Done (5.1 Order Tab > 5.2. Modify Transaction)
 
 ### Order Modification
 
-- **Removing Specific Products**: Done (Order Tab > 2. Modify Order)
+- **Removing Specific Products**: Done (5.1 Order Tab > 5.3. Modify Order > Search > Delete)
 
-- **Cancelling Entire Orders**: Done (Order Tab > 3. Show Order > Search > Input CustID > Select OrderID > Delete)
+- **Cancelling Entire Orders**: Done (5.1 Order Tab > 5.3. Modify Order > Search > Cancel)
 

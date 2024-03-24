@@ -661,7 +661,7 @@ def create_menus(customer_id):
 
         # Customer Dropdown
         customer_menu = tk.Menu(menu_bar, tearoff=0)
-        customer_menu.add_command(label="4.1. Add Customer", command=lambda: add_customer(root))
+        #customer_menu.add_command(label="4.1. Add Customer", command=lambda: add_customer(root))
         customer_menu.add_command(label="4.2. Show Customers", command=lambda:show_customers(root, db))
         menu_bar.add_cascade(label="4. Customer", menu=customer_menu)
 
@@ -675,7 +675,7 @@ def create_menus(customer_id):
     if VENDOR_ID is not None:
         # Vendor Dowpdown
         vendor_menu = tk.Menu(menu_bar, tearoff=0)
-        vendor_menu.add_command(label="2.1. Add Vendor", command=lambda: add_vendor(root))
+        #vendor_menu.add_command(label="2.1. Add Vendor", command=lambda: add_vendor(root))
         vendor_menu.add_command(label="2.2. Show Vendors", command=lambda: show_vendors(root, db))
         menu_bar.add_cascade(label="2. Vendor", menu=vendor_menu)
 
