@@ -14,15 +14,21 @@ class Database:
         self.conn.close()
 
     def insert_vendor(self, business_name, customer_feedback_score, geographical_presence):
-        with self.conn.cursor() as cursor:
-            sql = """
-                INSERT INTO
-                    Vendor (BusinessName, CustomerFeedbackScore, GeographicalPresence)
-                VALUES
-                    (%s, %s, %s)
-                """
-            cursor.execute(sql, (business_name, customer_feedback_score, geographical_presence))
-            self.conn.commit()
+        try:
+            with self.conn.cursor() as cursor:
+                sql = """
+                    INSERT INTO
+                        Vendor (BusinessName, CustomerFeedbackScore, GeographicalPresence)
+                    VALUES
+                        (%s, %s, %s)
+                    """
+                cursor.execute(sql, (business_name, customer_feedback_score, geographical_presence))
+                vendor_id = cursor.lastrowid
+                self.conn.commit()
+                return True, vendor_id
+        except Exception as e:
+            self.conn.rollback()
+            return False, None
 
     def show_vendors(self):
         with self.conn.cursor() as cursor:
@@ -37,15 +43,21 @@ class Database:
             return result
 
     def insert_customer(self, contact_number, shipping_details):
-        with self.conn.cursor() as cursor:
-            sql = """
-                INSERT INTO
-                    Customer (ContactNumber, ShippingDetails)
-                VALUES
-                    (%s, %s)
-                """
-            cursor.execute(sql, (contact_number, shipping_details))
-            self.conn.commit()
+        try:
+            with self.conn.cursor() as cursor:
+                sql = """
+                    INSERT INTO
+                        Customer (ContactNumber, ShippingDetails)
+                    VALUES
+                        (%s, %s)
+                    """
+                cursor.execute(sql, (contact_number, shipping_details))
+                customer_id = cursor.lastrowid
+                self.conn.commit()
+                return True, customer_id
+        except Exception as e:
+            self.conn.rollback()
+            return False, None
 
     def show_customers(self):
         with self.conn.cursor() as cursor:
@@ -58,18 +70,57 @@ class Database:
             cursor.execute(sql)
             result = cursor.fetchall()
             return result
-
-    def insert_product(self, vendor_id, name, price, tag1,tag2,tag3):
+            
+    def login_vendor(self, vendor_id):
         with self.conn.cursor() as cursor:
             sql = """
-                INSERT INTO
-                    Product (VendorID, Name, Price, Tag1, Tag2, Tag3)
-                VALUES
-                    (%s, %s, %s, %s, %s, %s)
+                SELECT
+                    *
+                FROM
+                    Vendor
+                WHERE
+                    VendorID = %s
                 """
-            product_data = (vendor_id, name, price,tag1,tag2,tag3)
-            cursor.execute(sql, product_data)
-            self.conn.commit()
+            cursor.execute(sql, (vendor_id,))
+            vendor_record = cursor.fetchone()
+            if vendor_record:
+                return True
+            else:
+                return False
+            
+    def login_customer(self, customer_id):
+        with self.conn.cursor() as cursor:
+            sql = """
+                SELECT
+                    *
+                FROM
+                    Customer
+                WHERE
+                    CustomerID = %s
+                """
+            cursor.execute(sql, (customer_id,))
+            customer_record = cursor.fetchone()
+            if customer_record:
+                return True
+            else:
+                return False
+
+    def insert_product(self, vendor_id, name, price, tag1, tag2, tag3):
+        try:
+            with self.conn.cursor() as cursor:
+                sql = """
+                    INSERT INTO
+                        Product (VendorID, Name, Price, Tag1, Tag2, Tag3)
+                    VALUES
+                        (%s, %s, %s, %s, %s, %s)
+                    """
+                cursor.execute(sql, (vendor_id, name, price, tag1, tag2, tag3))
+                product_id = cursor.lastrowid
+                self.conn.commit()
+                return True, product_id
+        except Exception as e:
+            self.conn.rollback()
+            return False, None
 
     def list_products(self):
         with self.conn.cursor() as cursor:

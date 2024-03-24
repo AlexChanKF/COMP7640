@@ -7,6 +7,8 @@ from tkinter import messagebox
 
 db_config = read_db_config()
 db = Database(**db_config)
+CUSTOMER_ID = None
+VENDOR_ID = None
 
 def center_window(parent, popup):
     parent.update_idletasks()
@@ -24,24 +26,31 @@ def center_window(parent, popup):
 
     popup.geometry(f'+{x}+{y}')
 
+def update_status(message, color):
+    status_bar.config(text=message, fg=color)
+    print(message)
+    
+def update_login_status(message, color):
+    login_status_bar.config(text=message, fg=color)
+
 #Vendor
-def get_vendor_info(parent):
+def add_vendor(parent):
 
     popup = tk.Toplevel(parent)
-    popup.title("Add Vendor")
+    popup.title("1.2. Add Vendors")
 
     # 添加标签和输入框
-    tk.Label(popup, text="Enter the business name of the vendor:").pack()
+    tk.Label(popup, text="1.1.1 Enter the Business Name of the Vendor:").pack(anchor='w')
     business_entry = tk.Entry(popup)
-    business_entry.pack()
+    business_entry.pack(fill='x')
 
-    tk.Label(popup, text="Enter the customer feedback score of the vendor [0-100]:").pack()
+    tk.Label(popup, text="1.1.2 Enter the Customer Feedback Score of the Vendor [0 - 100]:").pack(anchor='w')
     customer_score = tk.Entry(popup)
-    customer_score.pack()
+    customer_score.pack(fill='x')
 
-    tk.Label(popup, text="Enter the geographical presence of the vendor [HK,JP,TW]: ").pack()
+    tk.Label(popup, text="1.1.3 Enter the Geographical Presence of the Vendor [HK, JP, etc.]: ").pack(anchor='w')
     geographical_entry = tk.Entry(popup)
-    geographical_entry.pack()
+    geographical_entry.pack(fill='x')
 
     # 提交按钮
     submit_button = tk.Button(popup, text="Submit", command=lambda:submit_info())
@@ -53,54 +62,44 @@ def get_vendor_info(parent):
         business_name = business_entry.get()
         customer_feedback_score = customer_score.get()
         geographical_presence = geographical_entry.get()
-        db.insert_vendor(business_name, customer_feedback_score, geographical_presence)
+        success, vendor_id = db.insert_vendor(business_name, customer_feedback_score, geographical_presence)
+
+        if success:
+            status_message = "Success: The record was inserted. ID: {}, Name: {}, Score: {}, Presence: {}.".format(vendor_id, business_name, customer_feedback_score, geographical_presence)
+            update_status(status_message, "green")
+        else:
+            status_message = "Error: Failed to insert the record."
+            update_status(status_message, "red")
 
         # 关闭弹窗
         popup.destroy()
+        
+def login_vendor(parent):
 
-def add_products(parent):
     popup = tk.Toplevel(parent)
-    popup.title("Add Product")
-
-    # 添加标签和输入框
-    tk.Label(popup, text="Enter the VendorID of the product:").pack()
-    vendor_entry = tk.Entry(popup)
-    vendor_entry.pack()
-
-    tk.Label(popup, text="Enter the name of the product:").pack()
-    productname_entry = tk.Entry(popup)
-    productname_entry.pack()
-
-    tk.Label(popup, text="Enter the price of the product:").pack()
-    price_entry = tk.Entry(popup)
-    price_entry.pack()
-
-    tk.Label(popup, text="Enter the Tag1:").pack()
-    Tag1_entry= tk.Entry(popup)
-    Tag1_entry.pack()
-
-    tk.Label(popup, text="Enter the Tag2 ").pack()
-    Tag2_entry = tk.Entry(popup)
-    Tag2_entry.pack()
-
-    tk.Label(popup, text="Enter the Tag3 ").pack()
-    Tag3_entry = tk.Entry(popup)
-    Tag3_entry.pack()
-
-    # 提交按钮
-    submit_button = tk.Button(popup, text="Submit", command=lambda:submit_info())
+    popup.title("Login as a Vendor")
+    tk.Label(popup, text="Enter Vendor ID:").pack(anchor='w')
+    vendor_id_entry = tk.Entry(popup)
+    vendor_id_entry.pack(fill='x')
+    submit_button = tk.Button(popup, text="Submit", command=lambda:submit_vendor_id())
     submit_button.pack()
     center_window(parent, popup)
 
     # 提交按钮的功能
-    def submit_info():
-        vendorID=vendor_entry.get()
-        product_name = productname_entry.get()
-        price = price_entry.get()
-        Tag1 = Tag1_entry.get()
-        Tag2 = Tag2_entry.get()
-        Tag3 = Tag3_entry.get()
-        db.insert_product(vendorID,product_name, price,Tag1, Tag2 ,Tag3)
+    def submit_vendor_id():
+        vendor_id = vendor_id_entry.get()
+        success = db.login_vendor(vendor_id)
+        if success:
+            status_message = "Login with Vendor ID: {}.".format(vendor_id)
+            global CUSTOMER_ID
+            CUSTOMER_ID = None
+            global VENDOR_ID
+            VENDOR_ID = vendor_id
+            update_login_status(status_message, "green")
+            refresh_ui()
+        else:
+            status_message = "Error: Failed to Login."
+            update_login_status(status_message, "red")
 
         # 关闭弹窗
         popup.destroy()
@@ -108,10 +107,10 @@ def add_products(parent):
 def show_vendors(parent, database):
     # 创建弹窗
     db_window = tk.Toplevel(parent)
-    db_window.title("Vendor Database")
+    db_window.title("1.2. Show Vendors")
 
     # 设置树形控件以显示表格数据
-    columns = ("VendorID","BusinessName", "CutomerFeedbackScore", "GeographicalPresence")
+    columns = ("Vendor ID","Business Name", "Cutomer Feedback Score", "Geographical Presence")
     tree = ttk.Treeview(db_window, columns=columns, show='headings')
 
     # 定义表头
@@ -133,19 +132,97 @@ def show_vendors(parent, database):
         tree.insert("",tk.END,values=list)
     center_window(parent, db_window)
 
-#Customer
-def get_customer_info(parent):
+def add_product(parent):
     popup = tk.Toplevel(parent)
-    popup.title("输入信息")
+    popup.title("2.1. Add Products")
 
     # 添加标签和输入框
-    tk.Label(popup, text="Enter the phone number: ").pack()
-    contact_number_entry = tk.Entry(popup)
-    contact_number_entry.pack()
+    tk.Label(popup, text="2.1.1 Enter the Vendor ID of the Product:").pack(anchor='w')
+    vendor_entry = tk.Entry(popup)
+    vendor_entry.pack(fill='x')
 
-    tk.Label(popup, text="Enter the shipping details:").pack()
+    tk.Label(popup, text="2.1.2 Enter the Name of the Product:").pack(anchor='w')
+    productname_entry = tk.Entry(popup)
+    productname_entry.pack(fill='x')
+
+    tk.Label(popup, text="2.1.3 Enter the Price of the Product:").pack(anchor='w')
+    price_entry = tk.Entry(popup)
+    price_entry.pack(fill='x')
+
+    tk.Label(popup, text="2.1.4 Enter the Tag1:").pack(anchor='w')
+    Tag1_entry= tk.Entry(popup)
+    Tag1_entry.pack(fill='x')
+
+    tk.Label(popup, text="2.1.5 Enter the Tag2 ").pack(anchor='w')
+    Tag2_entry = tk.Entry(popup)
+    Tag2_entry.pack(fill='x')
+
+    tk.Label(popup, text="2.1.6 Enter the Tag3 ").pack(anchor='w')
+    Tag3_entry = tk.Entry(popup)
+    Tag3_entry.pack(fill='x')
+
+    # 提交按钮
+    submit_button = tk.Button(popup, text="Submit", command=lambda:submit_info())
+    submit_button.pack()
+    center_window(parent, popup)
+
+    # 提交按钮的功能
+    def submit_info():
+        vendor_id = vendor_entry.get()
+        product_name = productname_entry.get()
+        price = price_entry.get()
+        Tag1 = Tag1_entry.get()
+        Tag2 = Tag2_entry.get()
+        Tag3 = Tag3_entry.get()
+        success, product_id = db.insert_product(vendor_id, product_name, price, Tag1, Tag2 , Tag3)
+        if success:
+            status_message = "Success: The record was inserted. Product ID: {}, Name: {}, Price: {}, Tag[1,2,3]: [{},{},{}].".format(product_id, product_name, price, Tag1, Tag2, Tag3)
+            update_status(status_message, "green")
+        else:
+            status_message = "Error: Failed to insert the record."
+            update_status(status_message, "red")
+
+        # 关闭弹窗
+        popup.destroy()
+
+def show_products(parent, database):
+    all_pro= tk.Toplevel(parent)
+    all_pro.title("2.2. Add Products")
+    columns=('Product ID', 'Vendor ID','Name','Price', 'Tag 1', 'Tag 2','Tag 3')
+
+    tree = ttk.Treeview(all_pro, columns=columns, show='headings')
+
+    # 定义表头
+    for col in columns:
+        tree.heading(col, text=col)
+        tree.column(col, width=100, anchor="center")
+
+    # 将树形控件：放置在弹窗布局中
+    tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+    scrollbar = ttk.Scrollbar(all_pro, orient=tk.VERTICAL, command=tree.yview)
+    tree.configure(yscroll=scrollbar.set)
+    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+    center_window(parent, all_pro)
+
+    products = db.list_products()
+    list=[]
+    for product in products:
+        list = (f"{product['ProductID']}", f"{product['VendorID']}", f"{product['Name']}", f"{product['Price']}",f"{product['Tag1']}",f"{product['Tag2']}",f"{product['Tag3']}")
+        tree.insert("",tk.END,values=list)
+
+#Customer
+def add_customer(parent):
+    popup = tk.Toplevel(parent)
+    popup.title("3.1. Add Customer")
+
+    # 添加标签和输入框
+    tk.Label(popup, text="3.1.1 Enter the Phone Number: ").pack(anchor='w')
+    contact_number_entry = tk.Entry(popup)
+    contact_number_entry.pack(fill='x')
+
+    tk.Label(popup, text="3.1.2 Enter the Shipping Details:").pack(anchor='w')
     shipping_details_entry = tk.Entry(popup)
-    shipping_details_entry.pack()
+    shipping_details_entry.pack(fill='x')
     # 提交按钮
     submit_button = tk.Button(popup, text="Submit", command=lambda:submit_info())
     submit_button.pack()
@@ -155,17 +232,54 @@ def get_customer_info(parent):
     def submit_info():
         contact_number=contact_number_entry.get()
         shipping_details=shipping_details_entry.get()
-        db.insert_customer(contact_number, shipping_details)
-     # 关闭弹窗
+        success, customer_id = db.insert_customer(contact_number, shipping_details)
+        if success:
+            status_message = "Success: The record was inserted. Customer ID: {}, Contact Number: {}, Shipping Details: {}.".format(customer_id, contact_number, shipping_details)
+            update_status(status_message, "green")
+        else:
+            status_message = "Error: Failed to insert the record."
+            update_status(status_message, "red")
+
+        # 关闭弹窗
+        popup.destroy()
+        
+def login_customer(parent):
+
+    popup = tk.Toplevel(parent)
+    popup.title("Login as a Customer")
+    tk.Label(popup, text="Enter Customer ID:").pack(anchor='w')
+    customer_id_entry = tk.Entry(popup)
+    customer_id_entry.pack(fill='x')
+    submit_button = tk.Button(popup, text="Submit", command=lambda:submit_customer_id())
+    submit_button.pack()
+    center_window(parent, popup)
+
+    # 提交按钮的功能
+    def submit_customer_id():
+        customer_id = customer_id_entry.get()
+        success = db.login_customer(customer_id)
+        if success:
+            status_message = "Login with Customer ID: {}.".format(customer_id)
+            global CUSTOMER_ID
+            CUSTOMER_ID = customer_id
+            global VENDOR_ID
+            VENDOR_ID = None
+            update_login_status(status_message, "green")
+            refresh_ui()
+        else:
+            status_message = "Error: Failed to Login."
+            update_login_status(status_message, "red")
+
+        # 关闭弹窗
         popup.destroy()
 
 def show_customers(parent, database):
     # 创建弹窗
     db_window = tk.Toplevel(parent)
-    db_window.title("Customer Database")
+    db_window.title("Customer Information")
 
     # 设置树形控件以显示表格数据
-    columns = ("CutomerID","ContactNumber", "ShippingDetails")
+    columns = ("Cutomer ID","Contact Number", "Shipping Details")
     tree = ttk.Treeview(db_window, columns=columns, show='headings')
 
     # 定义表头
@@ -184,7 +298,6 @@ def show_customers(parent, database):
     list=[]
     for customer in customers:
         list = (f"{customer['CustomerID']}", f"{customer['ContactNumber']}", f"{customer['ShippingDetails']}")
-        print (list)
         tree.insert("",tk.END,values=list)
     center_window(parent, db_window)
 
@@ -198,8 +311,8 @@ def create_order(parent):
     # 创建一个字符串变量
     search_va = tk.StringVar()
     # 设置树形控件以显示表格数据
-    columns = ("ProductID","VendorID", "Name", "Price","Tag1","Tag2","Tag3")
-    columnsa = ("ProductID","Quantity")
+    columns = ("Product ID","Vendor ID", "Name", "Price","Tag 1","Tag 2","Tag 3")
+    columnsa = ("Product ID","Quantity")
     tk.Label(search_frame, text='Product Search By Name, Tags').pack(side=tk.LEFT, padx=6)
     tk.Entry(search_frame, relief='flat', width=10, textvariable=search_va).pack(side=tk.LEFT, padx=5)
     tk.Button(search_frame, text='All Product',command=lambda:print_products_table(parent)).pack(side=tk.LEFT,padx=8)
@@ -263,7 +376,7 @@ def create_order(parent):
     def listbox_selected(parent):
         quantity = tk.StringVar()
         cart = tk.Toplevel(parent)
-        cart.title("Creat Order")
+        cart.title("Create Order")
         tk.Label(cart, text="Select the quantity you want:").pack()
         tk.Spinbox(cart, from_=1, to=10, increment=1, textvariable=quantity).pack()
         tk.Button(cart, text='Add',command=lambda:add()).pack(side=tk.LEFT,padx=8)
@@ -278,7 +391,7 @@ def create_order(parent):
     def order(parent):
         customer = tk.StringVar()
         order_pop = tk.Toplevel(parent)
-        order_pop.title("Creat Order")
+        order_pop.title("Create Order")
         transaction_list = []
         tk.Label(order_pop, text="Enter your customer ID:").pack()
         tk.Entry(order_pop,textvariable=customer).pack()
@@ -299,18 +412,15 @@ def create_order(parent):
         tree1.delete(selection)
 
     def print_products_table(parent):
-
         all_pro= tk.Toplevel(parent)
-        all_pro.title("Creat Order")
-        columns=('ProductID', 'VendorID','Name','Price', 'Tag1', 'Tag2','Tag3')
-
+        all_pro.title("Create Order")
+        columns=('Product ID', 'Vendor ID', 'Name', 'Price', 'Tag 1', 'Tag 2','Tag 3')
         tree = ttk.Treeview(all_pro, columns=columns, show='headings')
 
-    # 定义表头
+        # 定义表头
         for col in columns:
             tree.heading(col, text=col)
             tree.column(col, width=100, anchor="center")
-
 
         # 将树形控件：放置在弹窗布局中
         tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
@@ -331,17 +441,16 @@ def order_modified(parent, datebase):
 
     all_order= tk.Toplevel()
     all_order.title("Modify Transaction")
-    columns=('TransactionID', 'OrderID','CustomerID','ProductID', 'Quantity', 'Date')
+    columns=('Transaction ID', 'Order ID', 'Customer ID','Product ID', 'Quantity', 'Date')
 
     tree = ttk.Treeview(all_order, columns=columns, show='headings')
     tk.Button(all_order, text="Choose", command=lambda:modify_info(parent)).pack()
     tk.Button(all_order, text="Delete", command=lambda:delete_transaction(parent)).pack()
 
-# 定义表头
+    # 定义表头
     for col in columns:
         tree.heading(col, text=col)
         tree.column(col, width=100, anchor="center")
-
 
     # 将树形控件：放置在弹窗布局中
     tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
@@ -359,13 +468,13 @@ def order_modified(parent, datebase):
     def modify_info(parent):
 
         mod_order= tk.Toplevel(parent)
-        tk.Label(mod_order, text="Enter the TrasactionID:").pack()
+        tk.Label(mod_order, text="Enter the Trasaction ID:").pack()
         TransactionID_entry=tk.Entry(mod_order)
         TransactionID_entry.pack()
-        tk.Label(mod_order, text="Enter the OrderID:").pack()
+        tk.Label(mod_order, text="Enter the Order ID:").pack()
         OrderID_entry=tk.Entry(mod_order)
         OrderID_entry.pack()
-        tk.Label(mod_order, text="Enter the CustomerID:").pack()
+        tk.Label(mod_order, text="Enter the Customer ID:").pack()
         CustomerID_entry=tk.Entry(mod_order)
         CustomerID_entry.pack()
         tk.Label(mod_order, text="Enter the Quantity you want to Modified:").pack()
@@ -384,13 +493,13 @@ def order_modified(parent, datebase):
 
     def delete_transaction(parent):
         del_order= tk.Toplevel(parent)
-        tk.Label(del_order, text="Enter the TrasactionID:").pack()
+        tk.Label(del_order, text="Enter the Trasaction ID:").pack()
         TransactionID_entry=tk.Entry(del_order)
         TransactionID_entry.pack()
-        tk.Label(del_order, text="Enter the OrderID:").pack()
+        tk.Label(del_order, text="Enter the Order ID:").pack()
         OrderID_entry=tk.Entry(del_order)
         OrderID_entry.pack()
-        tk.Label(del_order, text="Enter the CustomerID:").pack()
+        tk.Label(del_order, text="Enter the Customer ID:").pack()
         CustomerID_entry=tk.Entry(del_order)
         CustomerID_entry.pack()
         tk.Button(del_order, text="Submit", command=lambda:del_submit()).pack()
@@ -406,13 +515,13 @@ def order_modified(parent, datebase):
 def order_delete(parent):
     all_order= tk.Toplevel(parent)
     all_order.title("Modify Order")
-    columns=('OrderID','CustomerID','OrderDate', 'OrderStatus')
+    columns=('Order ID','Customer ID','Order Date', 'Order Status')
 
     tree = ttk.Treeview(all_order, columns=columns, show='headings')
     tk.Button(all_order, text="Search", command=lambda:search_order(parent)).pack()
     tk.Button(all_order, text="Delete", command=lambda:delete_order()).pack()
 
-# 定义表头
+    # 定义表头
     for col in columns:
         tree.heading(col, text=col)
         tree.column(col, width=100, anchor="center")
@@ -441,7 +550,6 @@ def order_delete(parent):
                 tree.insert("",tk.END,values=list)
             src_order.destroy()
 
-
     def delete_order():
         selection = tree.selection()
         if selection:
@@ -450,38 +558,92 @@ def order_delete(parent):
             db.cancel_order(first_column_value)
             tree.delete(*tree.selection())
 
+
+def refresh_ui():
+    create_menus(CUSTOMER_ID)
+
+def create_menus(customer_id):
+    menu_bar = tk.Menu(root)
+
+    # 创建菜单栏
+    menu_bar = tk.Menu(root)
+
+    # Registration Dowpdown
+    registration_menu = tk.Menu(menu_bar, tearoff=0)
+    registration_menu.add_command(label="0.1. Register as a Vendor", command=lambda: add_vendor(root))
+    registration_menu.add_command(label="0.2. Register as a Customer", command=lambda: add_customer(root))
+    menu_bar.add_cascade(label="0. Registration", menu=registration_menu)
+
+    # Login Dowpdown
+    login_menu = tk.Menu(menu_bar, tearoff=0)
+    login_menu.add_command(label="1.1. Login as a Vendor", command=lambda: login_vendor(root))
+    login_menu.add_command(label="1.2. Login as a Customer", command=lambda: login_customer(root))
+    menu_bar.add_cascade(label="1. Login", menu=login_menu)
+
+    if CUSTOMER_ID is not None:
+        # Vendor Dowpdown
+        #vendor_menu = tk.Menu(menu_bar, tearoff=0)
+        #vendor_menu.add_command(label="2.1. Add Vendor", command=lambda: add_vendor(root))
+        #vendor_menu.add_command(label="2.2. Show Vendors", command=lambda: show_vendors(root, db))
+        #menu_bar.add_cascade(label="2. Vendor", menu=vendor_menu)
+
+        # Product Dowpdown
+        product_menu = tk.Menu(menu_bar, tearoff=0)
+        #product_menu.add_command(label="3.1. Add Product", command=lambda: add_product(root))
+        product_menu.add_command(label="3.2. Show Products", command=lambda: show_products(root, db))
+        menu_bar.add_cascade(label="3. Product", menu=product_menu)
+
+        # Customer Dropdown
+        customer_menu = tk.Menu(menu_bar, tearoff=0)
+        customer_menu.add_command(label="4.1. Add Customer", command=lambda: add_customer(root))
+        customer_menu.add_command(label="4.2. Show Customers", command=lambda:show_customers(root, db))
+        menu_bar.add_cascade(label="4. Customer", menu=customer_menu)
+
+        # Product Dropdown
+        order_menu = tk.Menu(menu_bar, tearoff=0)
+        order_menu.add_command(label="5.1. Create Order", command=lambda: create_order(root))
+        order_menu.add_command(label="5.2. Modify Order",command=lambda:order_modified(root, db))
+        order_menu.add_command(label="5.3. Show Order",command=lambda: order_delete(root))
+        menu_bar.add_cascade(label="5. Order", menu=order_menu)
+        
+    if VENDOR_ID is not None:
+        # Vendor Dowpdown
+        vendor_menu = tk.Menu(menu_bar, tearoff=0)
+        vendor_menu.add_command(label="2.1. Add Vendor", command=lambda: add_vendor(root))
+        vendor_menu.add_command(label="2.2. Show Vendors", command=lambda: show_vendors(root, db))
+        menu_bar.add_cascade(label="2. Vendor", menu=vendor_menu)
+
+        # Product Dowpdown
+        product_menu = tk.Menu(menu_bar, tearoff=0)
+        product_menu.add_command(label="3.1. Add Product", command=lambda: add_product(root))
+        product_menu.add_command(label="3.2. Show Products", command=lambda: show_products(root, db))
+        menu_bar.add_cascade(label="3. Product", menu=product_menu)
+
+        # Customer Dropdown
+        customer_menu = tk.Menu(menu_bar, tearoff=0)
+        #customer_menu.add_command(label="4.1. Add Customer", command=lambda: add_customer(root))
+        customer_menu.add_command(label="4.2. Show Customers", command=lambda:show_customers(root, db))
+        menu_bar.add_cascade(label="4. Customer", menu=customer_menu)
+
+        # Product Dropdown
+        #order_menu = tk.Menu(menu_bar, tearoff=0)
+        #order_menu.add_command(label="5.1. Create Order", command=lambda: create_order(root))
+        #order_menu.add_command(label="5.2. Modify Order",command=lambda:order_modified(root, db))
+        #order_menu.add_command(label="5.3. Show Order",command=lambda: order_delete(root))
+        #menu_bar.add_cascade(label="5. Order", menu=order_menu)
+
+    # 配置主窗口使用菜单栏
+    root.config(menu=menu_bar)
+
 # 创建主窗口
 root = tk.Tk()
 root.title("Comp 7640")
 root.geometry("500x300")
-
-# 创建菜单栏
-menu_bar = tk.Menu(root)
-
-
-# Vendor Dowpdown
-vendor_menu = tk.Menu(menu_bar, tearoff=0)
-vendor_menu.add_command(label="1. Add Vendor", command=lambda: get_vendor_info(root))
-vendor_menu.add_command(label="2. Add Product", command=lambda: add_products(root))
-vendor_menu.add_command(label="3. Show Vendors", command=lambda: show_vendors(root, db))
-menu_bar.add_cascade(label="Vendor", menu=vendor_menu)
-
-
-# Customer Dropdown
-cus_menu = tk.Menu(menu_bar, tearoff=0)
-cus_menu.add_command(label="1. Add Customer", command=lambda: get_customer_info(root))
-cus_menu.add_command(label="2. Show Customers", command=lambda:show_customers(root, db))
-menu_bar.add_cascade(label="Customer", menu=cus_menu)
-
-# Product Dropdown
-poc_menu = tk.Menu(menu_bar, tearoff=0)
-poc_menu.add_command(label="1. Create Order", command=lambda: create_order(root))
-poc_menu.add_command(label="2. Modify Order",command=lambda:order_modified(root, db))
-poc_menu.add_command(label="3. Show Order",command=lambda: order_delete(root))
-menu_bar.add_cascade(label="Order", menu=poc_menu)
-
-# 配置主窗口使用菜单栏
-root.config(menu=menu_bar)
-
+login_status_bar = tk.Label(text="", bd=1, relief=tk.SUNKEN, anchor=tk.W)
+login_status_bar.pack(side=tk.TOP, fill=tk.X)
+# Initial UI setup
+refresh_ui()
+status_bar = tk.Label(text="", bd=1, relief=tk.SUNKEN, anchor=tk.W)
+status_bar.pack(side=tk.BOTTOM, fill=tk.X)
 # 运行主循环
 root.mainloop()
