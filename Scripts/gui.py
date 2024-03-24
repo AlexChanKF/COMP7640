@@ -28,27 +28,27 @@ def center_window(parent, popup):
 
 def update_status(message, color):
     status_bar.config(text=message, fg=color)
-    print(message)
     
 def update_login_status(message, color):
     login_status_bar.config(text=message, fg=color)
+    update_status("", None)
 
 #Vendor
 def add_vendor(parent):
 
     popup = tk.Toplevel(parent)
-    popup.title("1.2. Add Vendors")
+    popup.title("Add Vendors")
 
     # 添加标签和输入框
-    tk.Label(popup, text="1.1.1 Enter the Business Name of the Vendor:").pack(anchor='w')
+    tk.Label(popup, text="Enter the Business Name of the Vendor:").pack(anchor='w')
     business_entry = tk.Entry(popup)
     business_entry.pack(fill='x')
 
-    tk.Label(popup, text="1.1.2 Enter the Customer Feedback Score of the Vendor [0 - 100]:").pack(anchor='w')
+    tk.Label(popup, text="Enter the Customer Feedback Score of the Vendor [0 - 100]:").pack(anchor='w')
     customer_score = tk.Entry(popup)
     customer_score.pack(fill='x')
 
-    tk.Label(popup, text="1.1.3 Enter the Geographical Presence of the Vendor [HK, JP, etc.]: ").pack(anchor='w')
+    tk.Label(popup, text="Enter the Geographical Presence of the Vendor [HK, JP, etc.]: ").pack(anchor='w')
     geographical_entry = tk.Entry(popup)
     geographical_entry.pack(fill='x')
 
@@ -107,7 +107,7 @@ def login_vendor(parent):
 def show_vendors(parent, database):
     # 创建弹窗
     db_window = tk.Toplevel(parent)
-    db_window.title("1.2. Show Vendors")
+    db_window.title("Show Vendors")
 
     # 设置树形控件以显示表格数据
     columns = ("Vendor ID","Business Name", "Cutomer Feedback Score", "Geographical Presence")
@@ -134,30 +134,30 @@ def show_vendors(parent, database):
 
 def add_product(parent):
     popup = tk.Toplevel(parent)
-    popup.title("2.1. Add Products")
+    popup.title("Add Products")
 
     # 添加标签和输入框
-    tk.Label(popup, text="2.1.1 Enter the Vendor ID of the Product:").pack(anchor='w')
+    tk.Label(popup, text="Enter the Vendor ID of the Product:").pack(anchor='w')
     vendor_entry = tk.Entry(popup)
     vendor_entry.pack(fill='x')
 
-    tk.Label(popup, text="2.1.2 Enter the Name of the Product:").pack(anchor='w')
+    tk.Label(popup, text="Enter the Name of the Product:").pack(anchor='w')
     productname_entry = tk.Entry(popup)
     productname_entry.pack(fill='x')
 
-    tk.Label(popup, text="2.1.3 Enter the Price of the Product:").pack(anchor='w')
+    tk.Label(popup, text="Enter the Price of the Product:").pack(anchor='w')
     price_entry = tk.Entry(popup)
     price_entry.pack(fill='x')
 
-    tk.Label(popup, text="2.1.4 Enter the Tag1:").pack(anchor='w')
+    tk.Label(popup, text="Enter the Tag1:").pack(anchor='w')
     Tag1_entry= tk.Entry(popup)
     Tag1_entry.pack(fill='x')
 
-    tk.Label(popup, text="2.1.5 Enter the Tag2 ").pack(anchor='w')
+    tk.Label(popup, text="Enter the Tag2 ").pack(anchor='w')
     Tag2_entry = tk.Entry(popup)
     Tag2_entry.pack(fill='x')
 
-    tk.Label(popup, text="2.1.6 Enter the Tag3 ").pack(anchor='w')
+    tk.Label(popup, text="Enter the Tag3 ").pack(anchor='w')
     Tag3_entry = tk.Entry(popup)
     Tag3_entry.pack(fill='x')
 
@@ -186,41 +186,109 @@ def add_product(parent):
         popup.destroy()
 
 def show_products(parent, database):
-    all_pro= tk.Toplevel(parent)
-    all_pro.title("2.2. Add Products")
-    columns=('Product ID', 'Vendor ID','Name','Price', 'Tag 1', 'Tag 2','Tag 3')
+    if hasattr(parent, 'main_frame'):
+        parent.main_frame.destroy()
+        delattr(parent, 'main_frame')
+        
+    def populate_tree():
+        try:
+            products_list = fetch_products()
+            for product in products_list:
+                tree.insert('', 'end', values=product)
+        except Exception as e:
+            messagebox.showerror("Error", "Failed to load products.")
 
-    tree = ttk.Treeview(all_pro, columns=columns, show='headings')
+    def fetch_products():
+        try:
+            products = database.list_products()
+            return [list(product.values()) for product in products]
+        except Exception as e:
+            messagebox.showerror("Error", "Failed to fetch products from the database.")
+            return []
 
-    # 定义表头
+    main_frame = tk.Frame(parent)
+    main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+    parent.main_frame = main_frame
+
+    tree_frame = tk.Frame(main_frame)
+    tree_frame.pack(fill=tk.BOTH, expand=True)
+
+    columns = ("Product ID", "Vendor ID", "Name", "Price", "Tag 1", "Tag 2", "Tag 3")
+    tree = ttk.Treeview(tree_frame, columns=columns, show='headings')
+    tree.pack(fill=tk.BOTH, expand=True)
+
     for col in columns:
         tree.heading(col, text=col)
         tree.column(col, width=100, anchor="center")
 
-    # 将树形控件：放置在弹窗布局中
-    tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-    scrollbar = ttk.Scrollbar(all_pro, orient=tk.VERTICAL, command=tree.yview)
-    tree.configure(yscroll=scrollbar.set)
-    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-    center_window(parent, all_pro)
+    populate_tree()
 
-    products = db.list_products()
-    list=[]
-    for product in products:
-        list = (f"{product['ProductID']}", f"{product['VendorID']}", f"{product['Name']}", f"{product['Price']}",f"{product['Tag1']}",f"{product['Tag2']}",f"{product['Tag3']}")
-        tree.insert("",tk.END,values=list)
+def search_products(parent, database):
+
+    if hasattr(parent, 'main_frame'):
+        parent.main_frame.destroy()
+        delattr(parent, 'main_frame')
+        
+    def click_to_search():
+        key_word = search_var.get()
+        if key_word.strip():
+            try:
+                search_list = search(database, key_word)
+                show(search_list)
+            except Exception as e:
+                messagebox.showerror("Error", str(e))
+        else:
+            messagebox.showerror("Error", "The search keyword cannot be empty.")
+
+    def show(search_list):
+        tree.delete(*tree.get_children())
+        for product in search_list:
+            tree.insert('', 'end', values=product)
+
+    def search(database, word):
+        try:
+            products = database.search_products_by_tag_value(word)
+            return [list(product.values()) for product in products]
+        except Exception as e:
+            messagebox.showerror("Error", "Failed to search the database.")
+            return []
+
+    main_frame = tk.Frame(parent)
+    main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+    parent.main_frame = main_frame
+
+    search_frame = tk.Frame(main_frame)
+    search_frame.pack(fill=tk.X)
+
+    search_var = tk.StringVar()
+    search_entry = tk.Entry(search_frame, textvariable=search_var)
+    search_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
+
+    search_button = tk.Button(search_frame, text='Search', command=lambda: click_to_search())
+    search_button.pack(side=tk.LEFT)
+
+    tree_frame = tk.Frame(main_frame)
+    tree_frame.pack(fill=tk.BOTH, expand=True)
+
+    columns = ("Product ID", "Vendor ID", "Name", "Price", "Tag 1", "Tag 2", "Tag 3")
+    tree = ttk.Treeview(tree_frame, columns=columns, show='headings')
+    tree.pack(fill=tk.BOTH, expand=True)
+
+    for col in columns:
+        tree.heading(col, text=col)
+        tree.column(col, width=100, anchor="center")
 
 #Customer
 def add_customer(parent):
     popup = tk.Toplevel(parent)
-    popup.title("3.1. Add Customer")
+    popup.title("Add Customer")
 
     # 添加标签和输入框
-    tk.Label(popup, text="3.1.1 Enter the Phone Number: ").pack(anchor='w')
+    tk.Label(popup, text="Enter the Phone Number: ").pack(anchor='w')
     contact_number_entry = tk.Entry(popup)
     contact_number_entry.pack(fill='x')
 
-    tk.Label(popup, text="3.1.2 Enter the Shipping Details:").pack(anchor='w')
+    tk.Label(popup, text="Enter the Shipping Details:").pack(anchor='w')
     shipping_details_entry = tk.Entry(popup)
     shipping_details_entry.pack(fill='x')
     # 提交按钮
@@ -389,23 +457,12 @@ def create_order(parent):
             cart.destroy()
 
     def order(parent):
-        customer = tk.StringVar()
-        order_pop = tk.Toplevel(parent)
-        order_pop.title("Create Order")
         transaction_list = []
-        tk.Label(order_pop, text="Enter your customer ID:").pack()
-        tk.Entry(order_pop,textvariable=customer).pack()
-        submit_button = tk.Button(order_pop, text='Submit', command=lambda: submit_order())
-        submit_button.pack(side=tk.LEFT, padx=8)
-        center_window(parent, order_pop)
-        def submit_order():
-            for item in tree1.get_children():
-                values = tree1.item(item)['values']
-                if values:
-                    transaction_list.append(values)
-            print(transaction_list,customer.get())
-            db.insert_order(customer.get(), transaction_list)
-            order_pop.destroy()
+        for item in tree1.get_children():
+            values = tree1.item(item)['values']
+            # print( values[0]) ProductID
+            # print( values[1]) Quantity
+            db.insert_order(values[0], CUSTOMER_ID, values[1])
 
     def delete():
         selection = tree1.selection()
@@ -437,127 +494,135 @@ def create_order(parent):
     def close():
         popup.destroy()
 
-def order_modified(parent, datebase):
+def transaction_management(parent, datebase):
 
-    all_order= tk.Toplevel()
-    all_order.title("Modify Transaction")
-    columns=('Transaction ID', 'Order ID', 'Customer ID','Product ID', 'Quantity', 'Date')
+    all_transaction= tk.Toplevel()
+    all_transaction.title("Modify Transaction")
+    columns=('Transaction ID', 'Order ID', 'Shipped Date', 'Arrival Date')
 
-    tree = ttk.Treeview(all_order, columns=columns, show='headings')
-    tk.Button(all_order, text="Choose", command=lambda:modify_info(parent)).pack()
-    tk.Button(all_order, text="Delete", command=lambda:delete_transaction(parent)).pack()
-
-    # 定义表头
+    tree = ttk.Treeview(all_transaction, columns=columns, show='headings')
+    tk.Button(all_transaction, text="Search", command=lambda:search_transactions(datebase, CUSTOMER_ID)).pack()
+    tk.Button(all_transaction, text="Delete Transaction", command=lambda:delete_transaction(datebase)).pack()
+    
     for col in columns:
         tree.heading(col, text=col)
         tree.column(col, width=100, anchor="center")
 
-    # 将树形控件：放置在弹窗布局中
     tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-    scrollbar = ttk.Scrollbar(all_order, orient=tk.VERTICAL, command=tree.yview)
+    scrollbar = ttk.Scrollbar(all_transaction, orient=tk.VERTICAL, command=tree.yview)
     tree.configure(yscroll=scrollbar.set)
     scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+    center_window(parent, all_transaction)
+    
+    def search_transactions(datebase, customer_id):
+        transactions = datebase.show_transactions_by_customer_id(customer_id)
+        clear_tree()
+        for transaction in transactions:
+            add_transaction_to_tree(transaction)
 
-    transitions = datebase.list_transition()
-    list=[]
-    for transition in transitions:
-        list = (f"{transition['TransactionID']}", f"{transition['OrderID']}", f"{transition['CustomerID']}", f"{transition['ProductID']}",f"{transition['Quantity']}",f"{transition['Date']}")
-        tree.insert("",tk.END,values=list)
-    center_window(parent, all_order)
+    def clear_tree():
+        tree.delete(*tree.get_children())
 
-    def modify_info(parent):
+    def add_transaction_to_tree(transaction):
+        transaction_values = (
+            str(transaction['TransactionID']),
+            str(transaction['OrderID']),
+            str(transaction['ShippedDate']),
+            str(transaction['ArrivalDate'])
+        )
+        tree.insert("", tk.END, values=transaction_values)
 
-        mod_order= tk.Toplevel(parent)
-        tk.Label(mod_order, text="Enter the Trasaction ID:").pack()
-        TransactionID_entry=tk.Entry(mod_order)
-        TransactionID_entry.pack()
-        tk.Label(mod_order, text="Enter the Order ID:").pack()
-        OrderID_entry=tk.Entry(mod_order)
-        OrderID_entry.pack()
-        tk.Label(mod_order, text="Enter the Customer ID:").pack()
-        CustomerID_entry=tk.Entry(mod_order)
-        CustomerID_entry.pack()
-        tk.Label(mod_order, text="Enter the Quantity you want to Modified:").pack()
-        Quantity_entry=tk.Entry(mod_order)
-        Quantity_entry.pack()
-        tk.Button(mod_order, text="Submit", command=lambda:modify_submit()).pack()
-        center_window(parent, mod_order)
-
-        def modify_submit():
-            TransactionID = TransactionID_entry.get()
-            CustomerID = CustomerID_entry.get()
-            OrderID =OrderID_entry.get()
-            Quantity = Quantity_entry.get()
-            db.update_transaction(OrderID,CustomerID,TransactionID,Quantity)
-            mod_order.destroy()
-
-    def delete_transaction(parent):
-        del_order= tk.Toplevel(parent)
-        tk.Label(del_order, text="Enter the Trasaction ID:").pack()
-        TransactionID_entry=tk.Entry(del_order)
-        TransactionID_entry.pack()
-        tk.Label(del_order, text="Enter the Order ID:").pack()
-        OrderID_entry=tk.Entry(del_order)
-        OrderID_entry.pack()
-        tk.Label(del_order, text="Enter the Customer ID:").pack()
-        CustomerID_entry=tk.Entry(del_order)
-        CustomerID_entry.pack()
-        tk.Button(del_order, text="Submit", command=lambda:del_submit()).pack()
-        center_window(parent, del_order)
-
-        def del_submit():
-            TransactionID = TransactionID_entry.get()
-            CustomerID = CustomerID_entry.get()
-            OrderID =OrderID_entry.get()
-            db.delete_transaction(OrderID,CustomerID,TransactionID)
-            del_order.destroy()
-
-def order_delete(parent):
-    all_order= tk.Toplevel(parent)
-    all_order.title("Modify Order")
-    columns=('Order ID','Customer ID','Order Date', 'Order Status')
-
-    tree = ttk.Treeview(all_order, columns=columns, show='headings')
-    tk.Button(all_order, text="Search", command=lambda:search_order(parent)).pack()
-    tk.Button(all_order, text="Delete", command=lambda:delete_order()).pack()
-
-    # 定义表头
-    for col in columns:
-        tree.heading(col, text=col)
-        tree.column(col, width=100, anchor="center")
-
-
-    # 将树形控件：放置在弹窗布局中
-    tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-    scrollbar = ttk.Scrollbar(all_order, orient=tk.VERTICAL, command=tree.yview)
-    tree.configure(yscroll=scrollbar.set)
-    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-    center_window(parent, all_order)
-
-    def search_order(parent):
-        src_order= tk.Toplevel(parent)
-        src_order.title("Modify Transaction")
-        tk.Label(src_order, text="Enter the CusID:").pack()
-        CusID_entry=tk.Entry(src_order)
-        CusID_entry.pack()
-        tk.Button(src_order, text="Submit", command=lambda:modify_order()).pack()
-        center_window(parent, src_order)
-        def modify_order():
-            orders=db.show_orders(CusID_entry.get())
-            list=[]
-            for order in orders:
-                list = (f"{order['OrderID']}", f"{order['CustomerID']}", f"{order['OrderDate']}", f"{order['OrderStatus']}")
-                tree.insert("",tk.END,values=list)
-            src_order.destroy()
-
-    def delete_order():
+    def delete_transaction(datebase):
         selection = tree.selection()
         if selection:
             item = tree.item(selection[0])
-            first_column_value = item["values"][0]
-            db.cancel_order(first_column_value)
-            tree.delete(*tree.selection())
+            transaction_id = item["values"][0]
+            datebase.delete_transaction_by_transaction_id(transaction_id)
+            search_transactions(datebase, CUSTOMER_ID)
 
+def order_management(parent, datebase):
+    all_order= tk.Toplevel(parent)
+    all_order.title("Modify Order")
+    columns = ('Order ID', 'Product ID', 'Customer ID', 'Order Date', 'Quantity', 'Order Status')
+
+    tree = ttk.Treeview(all_order, columns=columns, show='headings')
+    tk.Button(all_order, text="Search", command=lambda:search_orders(datebase, CUSTOMER_ID)).pack()
+    tk.Button(all_order, text="Modify Quantity", command=lambda:modify_order_quantity(parent, datebase)).pack()
+    tk.Button(all_order, text="Cancel Order", command=lambda:cancel_order(datebase)).pack()
+    tk.Button(all_order, text="Delete Order", command=lambda:delete_order(datebase)).pack()
+
+    for col in columns:
+        tree.heading(col, text=col)
+        tree.column(col, width=100, anchor="center")
+
+    tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+    scrollbar = ttk.Scrollbar(all_order, orient=tk.VERTICAL, command=tree.yview)
+    tree.configure(yscroll=scrollbar.set)
+    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+    center_window(parent, all_order)
+
+    def search_orders(datebase, customer_id):
+        orders = datebase.show_orders(customer_id)
+        clear_tree()
+        for order in orders:
+            add_order_to_tree(order)
+
+    def clear_tree():
+        tree.delete(*tree.get_children())
+
+    def add_order_to_tree(order):
+        order_values = (
+            str(order['OrderID']),
+            str(order['ProductID']),
+            str(order['CustomerID']),
+            order['OrderDate'].isoformat(),
+            order['Quantity'],
+            order['OrderStatus']
+        )
+        tree.insert("", tk.END, values=order_values)
+
+    def cancel_order(datebase):
+        selection = tree.selection()
+        if selection:
+            item = tree.item(selection[0])
+            order_id = item["values"][0]
+            datebase.cancel_order(order_id)
+            search_orders(datebase, CUSTOMER_ID)
+            
+    def delete_order(datebase):
+        selection = tree.selection()
+        if selection:
+            item = tree.item(selection[0])
+            order_id = item["values"][0]
+            datebase.delete_order(order_id)
+            search_orders(datebase, CUSTOMER_ID)
+
+    def modify_order_quantity(parent, database):
+        modify_order_window = tk.Toplevel(parent)
+        modify_order_window.title("Modify Order Quantity")
+        
+        tk.Label(modify_order_window, text="Enter the Quantity you want to Modify:").pack()
+        
+        quantity_entry = tk.Entry(modify_order_window)
+        quantity_entry.pack()
+        
+        def on_submit():
+            quantity = quantity_entry.get()
+            selection = tree.selection()
+            
+            if selection:
+                item = tree.item(selection[0])
+                order_id = item["values"][0]
+                print(order_id)
+                print(quantity)
+                database.update_order_quantity(order_id, quantity)
+                search_orders(database, CUSTOMER_ID)
+                modify_order_window.destroy()
+
+        submit_button = tk.Button(modify_order_window, text="Submit", command=on_submit)
+        submit_button.pack()
+        
+        center_window(parent, modify_order_window)
 
 def refresh_ui():
     create_menus(CUSTOMER_ID)
@@ -591,6 +656,7 @@ def create_menus(customer_id):
         product_menu = tk.Menu(menu_bar, tearoff=0)
         #product_menu.add_command(label="3.1. Add Product", command=lambda: add_product(root))
         product_menu.add_command(label="3.2. Show Products", command=lambda: show_products(root, db))
+        product_menu.add_command(label="3.3. Search Product(s)", command=lambda: search_products(root, db))
         menu_bar.add_cascade(label="3. Product", menu=product_menu)
 
         # Customer Dropdown
@@ -602,8 +668,8 @@ def create_menus(customer_id):
         # Product Dropdown
         order_menu = tk.Menu(menu_bar, tearoff=0)
         order_menu.add_command(label="5.1. Create Order", command=lambda: create_order(root))
-        order_menu.add_command(label="5.2. Modify Order",command=lambda:order_modified(root, db))
-        order_menu.add_command(label="5.3. Show Order",command=lambda: order_delete(root))
+        order_menu.add_command(label="5.2. Modify Transaction",command=lambda:transaction_management(root, db))
+        order_menu.add_command(label="5.3. Modify Order",command=lambda: order_management(root, db))
         menu_bar.add_cascade(label="5. Order", menu=order_menu)
         
     if VENDOR_ID is not None:
@@ -628,8 +694,8 @@ def create_menus(customer_id):
         # Product Dropdown
         #order_menu = tk.Menu(menu_bar, tearoff=0)
         #order_menu.add_command(label="5.1. Create Order", command=lambda: create_order(root))
-        #order_menu.add_command(label="5.2. Modify Order",command=lambda:order_modified(root, db))
-        #order_menu.add_command(label="5.3. Show Order",command=lambda: order_delete(root))
+        #order_menu.add_command(label="5.2. Modify Transaction",command=lambda:transaction_management(root, db))
+        #order_menu.add_command(label="5.3. Modify Order",command=lambda: order_management(root, db))
         #menu_bar.add_cascade(label="5. Order", menu=order_menu)
 
     # 配置主窗口使用菜单栏

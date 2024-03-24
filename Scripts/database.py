@@ -110,7 +110,7 @@ class Database:
             with self.conn.cursor() as cursor:
                 sql = """
                     INSERT INTO
-                        Product (VendorID, Name, Price, Tag1, Tag2, Tag3)
+                        Inventory_Product (VendorID, Name, Price, Tag1, Tag2, Tag3)
                     VALUES
                         (%s, %s, %s, %s, %s, %s)
                     """
@@ -128,7 +128,7 @@ class Database:
                 SELECT
                     *
                 FROM
-                    Product
+                    Inventory_Product
                 """
             cursor.execute(sql, )
             result = cursor.fetchall()
@@ -140,7 +140,7 @@ class Database:
                 SELECT
                     *
                 FROM
-                    Product
+                    Inventory_Product
                 WHERE
                     VendorID = %s
                 """
@@ -155,7 +155,7 @@ class Database:
                 SELECT
                     *
                 FROM
-                    Product
+                    Inventory_Product
                 WHERE
                     Name LIKE %s
                     OR
@@ -169,35 +169,52 @@ class Database:
             result = cursor.fetchall()
             return result
 
-    def insert_order(self, customer_id, transaction_list):
+    def insert_order(self, product_id, customer_id, quantity):
         order_id = ""
-        completed_transaction_id_list = []
         today = date.today()
         with self.conn.cursor() as cursor:
             sql = """
                 INSERT INTO
-                    `Order` (CustomerID, OrderDate)
+                    Place_Order (ProductID, CustomerID, OrderDate, Quantity)
                 VALUES
-                    (%s, %s)
+                    (%s, %s, %s, %s)
                 """
-            cursor.execute(sql, (customer_id, today))
+            cursor.execute(sql, (product_id, customer_id, today, quantity))
             self.conn.commit()
             order_id = cursor.lastrowid
-        for transaction in transaction_list:
-            product_id, quantity = transaction
-            completed_transaction_id_list.append(self.insert_transaction(order_id, customer_id, product_id, quantity))
-        return order_id, completed_transaction_id_list
+            transaction_id= self.insert_transaction(order_id)
+        return order_id, transaction_id
+        
+    def update_order_quantity(self, order_id, quantity):
+        if int(quantity) < 0:
+            raise ValueError("Quantity cannot be negative.")
 
-    def insert_transaction(self, order_id, customer_id, product_id, quantity):
+        with self.conn.cursor() as cursor:
+            today = date.today()
+            sql = """
+                UPDATE Place_Order
+                SET Quantity = %s,
+                    OrderDate = %s
+                WHERE OrderID = %s
+            """
+            affected_rows = cursor.execute(sql, (quantity, today, order_id))
+            if affected_rows == 0:
+                self.conn.rollback()
+                return False
+            else:
+                self.conn.commit()
+                return True
+                
+    def insert_transaction(self, order_id):
         with self.conn.cursor() as cursor:
             today = date.today()
             sql = """
                 INSERT INTO
-                    Transaction (OrderID, CustomerID, ProductID, Quantity, Date)
+                    Transaction (OrderID)
                 VALUES
-                    (%s, %s, %s, %s, %s)
+                    (%s)
                 """
-            cursor.execute(sql, (order_id, customer_id, product_id, quantity, today))
+            cursor.execute(sql, (order_id))
             self.conn.commit()
             transaction_id = cursor.lastrowid
             return transaction_id
@@ -222,19 +239,16 @@ class Database:
                 self.conn.commit()
                 return True
 
-    def delete_transaction(self, order_id, customer_id, transaction_id):
+    def delete_order(self, order_id):
+        self.delete_transaction_by_order_id(order_id)
         with self.conn.cursor() as cursor:
             sql = """
                 DELETE FROM
-                    Transaction
+                    Place_Order
                 WHERE
                     OrderID = %s
-                AND
-                    CustomerID = %s
-                AND
-                    TransactionID = %s
             """
-            affected_rows = cursor.execute(sql, (order_id, customer_id, transaction_id))
+            affected_rows = cursor.execute(sql, (order_id))
             if affected_rows == 0:
                 self.conn.rollback()
                 return False
@@ -242,19 +256,54 @@ class Database:
                 self.conn.commit()
                 return True
 
-    def show_transactions(self, order_id, customer_id):
+    def delete_transaction_by_order_id(self, order_id):
         with self.conn.cursor() as cursor:
             sql = """
-                SELECT
-                    *
-                FROM
+                DELETE FROM
                     Transaction
                 WHERE
                     OrderID = %s
+            """
+            affected_rows = cursor.execute(sql, (order_id))
+            if affected_rows == 0:
+                self.conn.rollback()
+                return False
+            else:
+                self.conn.commit()
+                return True
+                
+    def delete_transaction_by_transaction_id(self, transaction_id):
+        with self.conn.cursor() as cursor:
+            sql = """
+                DELETE FROM
+                    Transaction
+                WHERE
+                    TransactionID = %s
+            """
+            affected_rows = cursor.execute(sql, (transaction_id))
+            if affected_rows == 0:
+                self.conn.rollback()
+                return False
+            else:
+                self.conn.commit()
+                return True
+
+    def show_transactions_by_customer_id(self, customer_id):
+        with self.conn.cursor() as cursor:
+            sql = """
+                SELECT
+                    t.TransactionID AS "TransactionID" ,
+                    t.OrderID AS "OrderID",
+                    t.ShippedDate AS "ShippedDate",
+                    t.ArrivalDate AS "ArrivalDate"
+                FROM
+                    `Transaction` t, Place_Order po
+                WHERE
+                    t.OrderID = po.OrderID
                 AND
                     CustomerID = %s
                 """
-            cursor.execute(sql, (order_id, customer_id))
+            cursor.execute(sql, (customer_id))
             result = cursor.fetchall()
             return result
 
@@ -262,13 +311,13 @@ class Database:
         with self.conn.cursor() as cursor:
             sql = """
                 UPDATE
-                    `Order`
+                    Place_Order
                 SET
                     OrderStatus = %s
                 WHERE
                     OrderID = %s
                 """
-            cursor.execute(sql, ("CANCELLED", order_id))
+            cursor.execute(sql, ("Cancelled", order_id))
             self.conn.commit()
 
     def show_orders(self, customer_id):
@@ -277,7 +326,7 @@ class Database:
                 SELECT
                     *
                 FROM
-                    `Order`
+                    Place_Order
                 WHERE
                     CustomerID = %s
                 """
@@ -291,7 +340,7 @@ class Database:
                 SELECT
                     *
                 FROM
-                    transaction
+                    Transaction
                 """
             cursor.execute(sql, )
             result = cursor.fetchall()
