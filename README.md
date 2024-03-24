@@ -81,11 +81,11 @@ You can start the application using one of the following methods:
 
 ### Option 2: Using the Command
 1. Open a command prompt or terminal window.
-2. Navigate to the directory where menu.py is located.
+2. Navigate to the directory where gui.py is located.
 3. Run the application with the following command:
 
    ```bash
-   python menu.py
+   python gui.py
    ```
    
    
@@ -93,28 +93,28 @@ You can start the application using one of the following methods:
 
 ### Vendor Administration
 
-- **Display a List of All Vendors**: Done (1. Vendor Management > 2. Show Vendors)
+- **Display a List of All Vendors**: Done (Vendor Tab > 3. Show Vendors)
 
-- **Onboard New Vendors**: Done (1. Vendor Management > 1. Add Vendor)
+- **Onboard New Vendors**: Done (Vendor Tab > 1. Add Vendor)
 
 ### Product Catalog Management
 
-- **Browse Products by Vendor**: Done (3. Search Management > 1. Search Products By Vendor ID)
+- **Browse Products by Vendor**: Done (Order Tab > 1. Create Order > All Product)
 
-- **Introduce New Products**: Done (1. Vendor Management > 1. Add Product)
+- **Introduce New Products**: Done (Vendor Tab > 2. Add Product)
 
 ### Product Discovery
 
-- **Tag-Based Search Feature**: Done (3. Search Management > 2. Search Products By Tag) 
+- **Tag-Based Search Feature**: Done (Order Tab > 1. Create Order > Search Products By Name and Tags) 
 ### Product Purchase
 
-- **Purchase Support**: Done (5. Order Management > 1. New Order)
+- **Purchase Support**: Done (Order Tab > 1. Create Order > Search Products > Select Product > Click "Add In Cart" > Input "Quantity" and then "Add" > Order > Input CustID > Submit Order)
 
-- **Transaction Recording**: Done (5. Order Management > 2. View Order History)
+- **Transaction Recording**: Done (Order Tab > 2. Modify Order)
 
 ### Order Modification
 
-- **Removing Specific Products**: Done (5. Order Management > 3. Modify Order)
+- **Removing Specific Products**: Done (Order Tab > 2. Modify Order)
 
-- **Cancelling Entire Orders**: Done (5. Order Management > 4. Cancel Order)
+- **Cancelling Entire Orders**: Done (Order Tab > 3. Show Order > Search > Input CustID > Select OrderID > Delete)
 

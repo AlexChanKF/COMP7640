@@ -20,11 +20,11 @@ function Find-Python {
 $pythonPath = Find-Python
 
 if ($pythonPath -ne $null) {
-    # Run menu.py with the located Python executable
-    & $pythonPath "menu.py"
+    # Run gui.py with the located Python executable
+    & $pythonPath "gui.py"
 } elseif ($customPythonPath -ne $null) {
-    # Run menu.py with the located Python executable
-	& $customPythonPath "menu.py"
+    # Run gui.py with the located Python executable
+	& $customPythonPath "gui.py"
 } else {
     Write-Error "Python executable not found. Please install Python or add it to your PATH."
     # Optionally, open a browser to the Python download page

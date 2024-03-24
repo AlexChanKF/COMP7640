@@ -59,7 +59,7 @@ class Database:
             result = cursor.fetchall()
             return result
 
-    def insert_product(self, vendor_id, name, price, tags):
+    def insert_product(self, vendor_id, name, price, tag1,tag2,tag3):
         with self.conn.cursor() as cursor:
             sql = """
                 INSERT INTO
@@ -67,7 +67,7 @@ class Database:
                 VALUES
                     (%s, %s, %s, %s, %s, %s)
                 """
-            product_data = (vendor_id, name, price) + tuple(tags)
+            product_data = (vendor_id, name, price,tag1,tag2,tag3)
             cursor.execute(sql, product_data)
             self.conn.commit()
 
@@ -231,5 +231,17 @@ class Database:
                     CustomerID = %s
                 """
             cursor.execute(sql, (customer_id,))
+            result = cursor.fetchall()
+            return result
+
+    def list_transition(self):
+        with self.conn.cursor() as cursor:
+            sql = """
+                SELECT
+                    *
+                FROM
+                    transaction
+                """
+            cursor.execute(sql, )
             result = cursor.fetchall()
             return result
