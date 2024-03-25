@@ -103,6 +103,15 @@ def login_vendor(parent):
 
         # 关闭弹窗
         popup.destroy()
+        
+def logout(parent):
+    status_message = "Logout Successfully."
+    global CUSTOMER_ID
+    CUSTOMER_ID = None
+    global VENDOR_ID
+    VENDOR_ID = None
+    update_login_status(status_message, "green")
+    refresh_ui()
 
 def show_vendors(parent, database):
     # 创建弹窗
@@ -633,16 +642,18 @@ def create_menus(customer_id):
     # 创建菜单栏
     menu_bar = tk.Menu(root)
 
-    # Registration Dowpdown
-    registration_menu = tk.Menu(menu_bar, tearoff=0)
-    registration_menu.add_command(label="0.1. Register as a Vendor", command=lambda: add_vendor(root))
-    registration_menu.add_command(label="0.2. Register as a Customer", command=lambda: add_customer(root))
-    menu_bar.add_cascade(label="0. Registration", menu=registration_menu)
+    if CUSTOMER_ID is None and VENDOR_ID is None:
+        # Registration Dowpdown
+        registration_menu = tk.Menu(menu_bar, tearoff=0)
+        registration_menu.add_command(label="0.1. Register as a Vendor", command=lambda: add_vendor(root))
+        registration_menu.add_command(label="0.2. Register as a Customer", command=lambda: add_customer(root))
+        menu_bar.add_cascade(label="0. Registration", menu=registration_menu)
 
     # Login Dowpdown
     login_menu = tk.Menu(menu_bar, tearoff=0)
     login_menu.add_command(label="1.1. Login as a Vendor", command=lambda: login_vendor(root))
     login_menu.add_command(label="1.2. Login as a Customer", command=lambda: login_customer(root))
+    login_menu.add_command(label="1.3. Logout", command=lambda: logout(root))
     menu_bar.add_cascade(label="1. Login", menu=login_menu)
 
     if CUSTOMER_ID is not None:
