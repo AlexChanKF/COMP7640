@@ -117,7 +117,9 @@ You can start the application using one of the following methods:
 
 ### Product Discovery
 
-- **Tag-Based Search Feature**: Done (3. Product Tab > 3.3. Search Product(s))
+- **Tag-Based Search Feature**: Done (3. Product Tab > 3.3. Search Product(s) by Name Or Tags)
+
+- **VendorID-Based Search Feature**: Done (3. Product Tab > 3.4. Search Product(s) by Vendor ID)
 
 ### Product Purchase (Customer Only)
 
