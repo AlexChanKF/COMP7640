@@ -148,8 +148,8 @@ class Database:
             result = cursor.fetchall()
             return result
 
-    def search_products_by_tag_value(self, tag_value_pattern):
-        search_pattern = f"%{tag_value_pattern}%"
+    def search_products_by_name_and_tag_value(self, keyword):
+        search_pattern = f"%{keyword}%"
         with self.conn.cursor() as cursor:
             sql = """
                 SELECT
@@ -169,21 +169,29 @@ class Database:
             result = cursor.fetchall()
             return result
 
-    def insert_order(self, product_id, customer_id, quantity):
-        order_id = ""
-        today = date.today()
-        with self.conn.cursor() as cursor:
-            sql = """
-                INSERT INTO
-                    Place_Order (ProductID, CustomerID, OrderDate, Quantity)
-                VALUES
-                    (%s, %s, %s, %s)
-                """
-            cursor.execute(sql, (product_id, customer_id, today, quantity))
-            self.conn.commit()
-            order_id = cursor.lastrowid
-            transaction_id= self.insert_transaction(order_id)
-        return order_id, transaction_id
+    def insert_order(self, customer_id, order_details):
+        order_ids = []
+        transaction_ids = []
+
+        for order in order_details:
+            product_id, quantity = order[0], order[4]
+            today = date.today()
+            with self.conn.cursor() as cursor:
+                sql = """
+                    INSERT INTO
+                        Place_Order (ProductID, CustomerID, OrderDate, Quantity)
+                    VALUES
+                        (%s, %s, %s, %s)
+                    """
+                cursor.execute(sql, (product_id, customer_id, today, quantity))
+                self.conn.commit()
+                order_id = cursor.lastrowid
+                transaction_id = self.insert_transaction(order_id)
+
+                order_ids.append(order_id)
+                transaction_ids.append(transaction_id)
+        
+        return order_ids, transaction_ids
         
     def update_order_quantity(self, order_id, quantity):
         if int(quantity) < 0:
