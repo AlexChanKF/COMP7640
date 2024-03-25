@@ -233,7 +233,7 @@ def show_products(parent, database):
 
     populate_tree()
 
-def search_products(parent, database):
+def search_products_by_name_and_tag(parent, database):
 
     if hasattr(parent, 'main_frame'):
         parent.main_frame.destroy()
@@ -257,7 +257,62 @@ def search_products(parent, database):
 
     def search(database, word):
         try:
-            products = database.search_products_by_tag_value(word)
+            products = database.search_products_by_name_and_tag_value(word)
+            return [list(product.values()) for product in products]
+        except Exception as e:
+            messagebox.showerror("Error", "Failed to search the database.")
+            return []
+
+    main_frame = tk.Frame(parent)
+    main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+    parent.main_frame = main_frame
+
+    search_frame = tk.Frame(main_frame)
+    search_frame.pack(fill=tk.X)
+
+    search_var = tk.StringVar()
+    search_entry = tk.Entry(search_frame, textvariable=search_var)
+    search_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
+
+    search_button = tk.Button(search_frame, text='Search', command=lambda: click_to_search())
+    search_button.pack(side=tk.LEFT)
+
+    tree_frame = tk.Frame(main_frame)
+    tree_frame.pack(fill=tk.BOTH, expand=True)
+
+    columns = ("Product ID", "Vendor ID", "Name", "Price", "Tag 1", "Tag 2", "Tag 3")
+    tree = ttk.Treeview(tree_frame, columns=columns, show='headings')
+    tree.pack(fill=tk.BOTH, expand=True)
+
+    for col in columns:
+        tree.heading(col, text=col)
+        tree.column(col, width=100, anchor="center")
+        
+def search_products_by_vendor_id(parent, database):
+
+    if hasattr(parent, 'main_frame'):
+        parent.main_frame.destroy()
+        delattr(parent, 'main_frame')
+        
+    def click_to_search():
+        key_word = search_var.get()
+        if key_word.strip():
+            try:
+                search_list = search(database, key_word)
+                show(search_list)
+            except Exception as e:
+                messagebox.showerror("Error", str(e))
+        else:
+            messagebox.showerror("Error", "The search keyword cannot be empty.")
+
+    def show(search_list):
+        tree.delete(*tree.get_children())
+        for product in search_list:
+            tree.insert('', 'end', values=product)
+
+    def search(database, word):
+        try:
+            products = database.search_products_by_vendor_id(word)
             return [list(product.values()) for product in products]
         except Exception as e:
             messagebox.showerror("Error", "Failed to search the database.")
@@ -651,7 +706,8 @@ def create_menus(customer_id):
         product_menu = tk.Menu(menu_bar, tearoff=0)
         #product_menu.add_command(label="3.1. Add Product", command=lambda: add_product(root))
         product_menu.add_command(label="3.2. Show Products", command=lambda: show_products(root, db))
-        product_menu.add_command(label="3.3. Search Product(s)", command=lambda: search_products(root, db))
+        product_menu.add_command(label="3.3. Search Product(s) by Name Or Tags", command=lambda: search_products_by_name_and_tag(root, db))
+        product_menu.add_command(label="3.4. Search Product(s) by Vendor ID", command=lambda: search_products_by_vendor_id(root, db))
         menu_bar.add_cascade(label="3. Product", menu=product_menu)
 
         # Customer Dropdown
@@ -678,6 +734,8 @@ def create_menus(customer_id):
         product_menu = tk.Menu(menu_bar, tearoff=0)
         product_menu.add_command(label="3.1. Add Product", command=lambda: add_product(root))
         product_menu.add_command(label="3.2. Show Products", command=lambda: show_products(root, db))
+        product_menu.add_command(label="3.3. Search Product(s) by Name Or Tags", command=lambda: search_products_by_name_and_tag(root, db))
+        product_menu.add_command(label="3.4. Search Product(s) by Vendor ID", command=lambda: search_products_by_vendor_id(root, db))
         menu_bar.add_cascade(label="3. Product", menu=product_menu)
 
         # Customer Dropdown

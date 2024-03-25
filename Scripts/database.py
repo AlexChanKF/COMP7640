@@ -148,8 +148,8 @@ class Database:
             result = cursor.fetchall()
             return result
 
-    def search_products_by_name_and_tag_value(self, keyword):
-        search_pattern = f"%{keyword}%"
+    def search_products_by_name_and_tag_value(self, name_tag_value_pattern):
+        search_pattern = f"%{name_tag_value_pattern}%"
         with self.conn.cursor() as cursor:
             sql = """
                 SELECT
