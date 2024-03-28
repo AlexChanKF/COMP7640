@@ -525,6 +525,7 @@ def create_order(parent, database):
         for item in cart_items:
             product = cart_tree.item(item)['values']
             order_details.append(product)
+            print('order_details', order_details)
         try:
             database.insert_order(CUSTOMER_ID, order_details)
             messagebox.showinfo("Order Success", "The order has been placed successfully.")
@@ -564,6 +565,7 @@ def transaction_management(parent, datebase):
     
     def search_transactions(datebase, customer_id):
         transactions = datebase.show_transactions_by_customer_id(customer_id)
+        print('show tranactions', transactions)
         clear_tree()
         for transaction in transactions:
             add_transaction_to_tree(transaction)
@@ -661,9 +663,10 @@ def order_management(parent, datebase):
             if selection:
                 item = tree.item(selection[0])
                 order_id = item["values"][0]
+                product_id = item["values"][1]
                 print(order_id)
                 print(quantity)
-                database.update_order_quantity(order_id, quantity)
+                database.update_order_quantity(order_id, quantity, product_id)
                 search_orders(database, CUSTOMER_ID)
                 modify_order_window.destroy()
 

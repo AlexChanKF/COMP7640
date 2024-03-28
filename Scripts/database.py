@@ -173,27 +173,35 @@ class Database:
         order_ids = []
         transaction_ids = []
 
-        for order in order_details:
-            product_id, quantity = order[0], order[4]
-            today = date.today()
-            with self.conn.cursor() as cursor:
-                sql = """
-                    INSERT INTO
-                        Place_Order (ProductID, CustomerID, OrderDate, Quantity)
-                    VALUES
-                        (%s, %s, %s, %s)
-                    """
-                cursor.execute(sql, (product_id, customer_id, today, quantity))
-                self.conn.commit()
-                order_id = cursor.lastrowid
-                transaction_id = self.insert_transaction(order_id)
-
-                order_ids.append(order_id)
-                transaction_ids.append(transaction_id)
+        # To get (last orderID + 1) and let this be the current orderID for the following order inserting
+        with self.conn.cursor() as cursor1:
+            get_orders = """
+                                SELECT * from Place_Order
+                                """
+            cursor1.execute(get_orders)
+            all_orders = cursor1.fetchall()
+            last_auto_id = all_orders[-1]['Auto_ID']
+            last_order_id = all_orders[-1]['OrderID']
+            for order in order_details:
+                product_id, quantity = order[0], order[4]
+                today = date.today()
+                with self.conn.cursor() as cursor:
+                    sql = """
+                        INSERT INTO
+                            Place_Order (OrderID, ProductID, CustomerID, OrderDate, Quantity)
+                        VALUES
+                            (%s, %s, %s, %s, %s)
+                        """
+                    cursor.execute(sql, (last_order_id + 1, product_id, customer_id, today, quantity))
+                    self.conn.commit()
+            transaction_id = self.insert_transaction(last_auto_id + 1, last_order_id + 1)
+            print('$$$$$$$$$$')
+            order_ids.append(last_order_id + 1)
+            transaction_ids.append(transaction_id)
         
         return order_ids, transaction_ids
         
-    def update_order_quantity(self, order_id, quantity):
+    def update_order_quantity(self, order_id, quantity, product_id):
         if int(quantity) < 0:
             raise ValueError("Quantity cannot be negative.")
 
@@ -204,8 +212,9 @@ class Database:
                 SET Quantity = %s,
                     OrderDate = %s
                 WHERE OrderID = %s
+                AND ProductID = %s
             """
-            affected_rows = cursor.execute(sql, (quantity, today, order_id))
+            affected_rows = cursor.execute(sql, (quantity, today, order_id, product_id))
             if affected_rows == 0:
                 self.conn.rollback()
                 return False
@@ -213,16 +222,16 @@ class Database:
                 self.conn.commit()
                 return True
                 
-    def insert_transaction(self, order_id):
+    def insert_transaction(self, auto_id, order_id):
         with self.conn.cursor() as cursor:
             today = date.today()
             sql = """
                 INSERT INTO
-                    Transaction (OrderID)
+                    Transaction (Auto_ID, OrderID)
                 VALUES
-                    (%s)
+                    (%s, %s)
                 """
-            cursor.execute(sql, (order_id))
+            cursor.execute(sql, (auto_id, order_id))
             self.conn.commit()
             transaction_id = cursor.lastrowid
             return transaction_id
@@ -307,7 +316,7 @@ class Database:
                 FROM
                     `Transaction` t, Place_Order po
                 WHERE
-                    t.OrderID = po.OrderID
+                    t.Auto_ID = po.Auto_ID
                 AND
                     CustomerID = %s
                 """
