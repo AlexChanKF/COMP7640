@@ -1,0 +1,105 @@
+CREATE SCHEMA IF NOT EXISTS `comp7640`
+    DEFAULT CHARACTER SET utf8mb4;
+
+USE comp7640;
+
+-- Create Table `Vendor`
+CREATE TABLE IF NOT EXISTS Vendor (
+    VendorID INT AUTO_INCREMENT PRIMARY KEY,
+    BusinessName VARCHAR(255) NOT NULL,
+    CustomerFeedbackScore DECIMAL(3,0),
+    GeographicalPresence VARCHAR(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Create Table `Inventory_Product`
+CREATE TABLE IF NOT EXISTS Inventory_Product (
+    ProductID INT AUTO_INCREMENT PRIMARY KEY,
+    VendorID INT NOT NULL,
+    Name VARCHAR(255) NOT NULL,
+    Price DECIMAL(10,2) NOT NULL,
+    Tag1 VARCHAR(255),
+    Tag2 VARCHAR(255),
+    Tag3 VARCHAR(255),
+    FOREIGN KEY (VendorID) REFERENCES Vendor(VendorID)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Create Table `Customer`
+CREATE TABLE IF NOT EXISTS Customer (
+    CustomerID INT AUTO_INCREMENT PRIMARY KEY,
+    ContactNumber VARCHAR(255) NOT NULL,
+    ShippingDetails TEXT NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Create Table `Place_Order`
+CREATE TABLE IF NOT EXISTS Place_Order (
+    Auto_ID INT AUTO_INCREMENT PRIMARY KEY,
+    OrderID INT NOT NULL,
+    ProductID INT NOT NULL,
+    CustomerID INT NOT NULL,
+    OrderDate DATE NOT NULL,
+    Quantity INT NOT NULL,
+    OrderStatus VARCHAR(255) DEFAULT 'Pending',
+    FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID),
+    FOREIGN KEY (ProductID) REFERENCES Inventory_Product(ProductID)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Create Table `Transaction`
+CREATE TABLE IF NOT EXISTS `Transaction` (
+    TransactionID INT AUTO_INCREMENT PRIMARY KEY,
+    Auto_ID INT NOT NULL,
+    OrderID INT NOT NULL,
+    ShippedDate DATE,
+    ArrivalDate DATE,
+    FOREIGN KEY (Auto_ID) REFERENCES Place_Order(Auto_ID)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Insert records into `Vendor`
+INSERT INTO Vendor (BusinessName, CustomerFeedbackScore, GeographicalPresence) VALUES
+('Global Tech Innovations Co., Ltd.', 90, 'Global'),
+('Super Urban Co., Ltd.', 85, 'North America'),
+('Metropolis Technology Co., Ltd.', 95, 'Europe'),
+('Adventure Gear Co., Ltd.', 80, 'Asia'),
+('Green Tech Essentials Co., Ltd.', 88, 'Global');
+
+-- Insert records into `Inventory_Product`
+INSERT INTO Inventory_Product (VendorID, Name, Price, Tag1, Tag2, Tag3) VALUES
+(1, 'EcoCharge Solar Power Bank', 19.99, 'Electronics', 'Gadget', 'Portable'),
+(2, 'High-Performance Men’s Running Shoe', 29.99, 'Apparel', 'Men', 'Shoe'),
+(1, 'HomeSurround Bluetooth Speaker', 39.99, 'Electronics', 'Home', 'Speaker'),
+(3, 'Ultimate Sci-Fi Collection eBook', 49.99, 'Media', 'Books', 'Novel'),
+(4, 'Eco-friendly Reusable Water Bottle', 14.99, 'Sustainable', 'Accessories', 'Hydration'),
+(1, 'Wireless Ergonomic Keyboard', 49.99, 'Electronics', 'Peripheral', 'Ergonomic'),
+(2, 'Trailblazer GPS Smartwatch', 199.99, 'Apparel', 'Accessory', 'Wearable'),
+(1, 'Smart LED Light Bulb', 15.99, 'Electronics', 'Home', 'Lighting'),
+(3, 'Professional Photography Drone', 349.99, 'Electronics', 'Camera', 'Drone'),
+(5, 'Organic Cotton Yoga Mat', 29.99, 'Sustainable', 'Fitness', 'Yoga');
+
+-- Insert records into `Customer`
+INSERT INTO Customer (ContactNumber, ShippingDetails) VALUES
+('123-456-7890', '123 First St, City, Country'),
+('234-567-8901', '234 Second St, City, Country'),
+('345-678-9012', '345 Third St, City, Country'),
+('456-789-0123', '456 Fourth St, City, Country'),
+('567-890-1234', '567 Fifth St, City, Country');
+
+-- Insert records into `Place_Order`
+INSERT INTO Place_Order (OrderID, ProductID, CustomerID, OrderDate, Quantity, OrderStatus) 
+VALUES (1, 1, 1, '2024-03-01', 1, 'Pending'),
+(1, 2, 1, '2024-03-01', 2, 'Pending'),
+(1, 3, 1, '2024-03-01', 3, 'Pending'),
+(1, 4, 1, '2024-03-01', 4, 'Pending'),
+(2, 3, 2, '2024-03-03', 1, 'Pending'),
+(3, 4, 2, '2024-03-04', 10, 'Pending'),
+(4, 5, 3, '2024-03-05', 5, 'Pending'),
+(5, 1, 3, '2024-03-06', 9, 'Pending'),
+(5, 1, 3, '2024-03-06', 3, 'Pending'),
+(6, 1, 4, '2024-03-07', 3, 'Pending');
+
+-- Insert records into `Transaction`
+INSERT INTO Transaction (Auto_ID, OrderID, ShippedDate , ArrivalDate) VALUES
+(1, 1, '2024-03-02', '2024-03-05'),
+(2, 2, '2024-03-03', '2024-03-06'),
+(3, 3, '2024-03-04', '2024-03-07'),
+(4, 4, '2024-03-05', '2024-03-08'),
+(5, 5, '2024-03-06', '2024-03-09'),
+(6, 6, '2024-03-07', NULL);
